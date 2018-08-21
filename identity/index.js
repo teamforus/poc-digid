@@ -9,12 +9,32 @@ const Web3 = require('web3');
 const dirty = require('dirty');
 const crypto = require('crypto');
 const IdentityContractData = require('../contracts/identity');
+const WebSocket = require('ws');
 
 const web3 = new Web3(appSettings.web3.node);
 
 const loginIdSessions = {};
 
 getAppKey().then((appKey) => {
+
+    const wss = new WebSocket.Server({ port: 8484 });
+    wss.on('connection', function connection(ws) {
+        
+        ws.on('error', function(error) {
+            // do nothing; ignore errors (dropped connections)
+        });
+        
+        ws.on('message', function incoming(message) {
+            var event = JSON.parse(message);
+
+            switch (event.eventName) {
+                case 'subscribeToLogin':
+                    loginIdSessions['id_' + event.eventData.loginId].ws = ws;
+                    break;
+            }
+
+        });
+    });
 
     web3.shh.subscribe(
         'messages', {
@@ -23,7 +43,8 @@ getAppKey().then((appKey) => {
     ).on('data', data => {
         const loginData = JSON.parse(web3.utils.hexToUtf8(data.payload));
         if ('login' === loginData.request) {
-            const session = loginIdSessions['id_' + loginData.id];
+            const session = loginIdSessions['id_' + loginData.id].session;
+            const ws = loginIdSessions['id_' + loginData.id].ws;
             const identityData = {
                 address: loginData.body.address,
                 key: loginData.body.key,
@@ -51,6 +72,12 @@ getAppKey().then((appKey) => {
                     ) {
                         session.identity = identityData;
                         session.save();
+                        
+                        const message = JSON.stringify({
+                            eventName: 'loggedIn',
+                            eventData: {}
+                        });
+                        ws.send(message);
                     }
                 });
             }
@@ -67,7 +94,7 @@ getAppKey().then((appKey) => {
 
             const loginId = await getRandomInt();
 
-            loginIdSessions['id_'+loginId] = req.session;
+            loginIdSessions['id_'+loginId] = { session: req.session };
 
             const loginQrCodeData = {
                 'type': 'login',
@@ -82,7 +109,7 @@ getAppKey().then((appKey) => {
                     // TODO: logging
                     // TODO: show error page
                 } else {
-                    res.render('identity_login', { bsn: loginId, qrcode: url })
+                    res.render('identity_login', { loginId: loginId, qrcode: url })
                 }
             })
         }
