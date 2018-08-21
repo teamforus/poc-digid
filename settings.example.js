@@ -15,5 +15,13 @@ module.exports = {
         sharedSecret: '',
         aSelectServer: '',
         verifyUrl: ''
+    },
+    web3: {
+        node: '',
+        gas: 1000,
+        chainId: 1,
+        appKeyDb: 'var/keys.db',
+        appKeyIdKey: 'appKeyId',
+        libAddrMap: []
     }
 }
