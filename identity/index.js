@@ -8,6 +8,7 @@ var QRCode = require('qrcode');
 const Web3 = require('web3');
 const dirty = require('dirty');
 const crypto = require('crypto');
+const IdentityContractData = require('../contracts/identity');
 
 const web3 = new Web3(appSettings.web3.node);
 
@@ -28,11 +29,31 @@ getAppKey().then((appKey) => {
                 key: loginData.body.key,
                 name: loginData.body.name
             };
+            const signature = loginData.body.signature;
+            const signData = web3.utils.soliditySha3(identityData.address, identityData.key, identityData.name);
+            const recoveredKey = web3.eth.accounts.recover(signData, signature);
+            if (recoveredKey == identityData.key) {
 
-            
+                const identityContract = new web3.eth.Contract(
+                    IdentityContractData.abi,
+                    identityData.address,
+                    null
+                );
+                
+                const paddedKey = web3.utils.padLeft(identityData.key, 64)
 
-            session.identity = identityData;
-            session.save();
+                identityContract.methods.getKey(paddedKey).call().then((keyData) => {
+                    if (keyData.keyType == 1
+                        &&
+                        (keyData.purposes.includes('1') || keyData.purposes.includes('2'))
+                        &&
+                        keyData.key.toString().toUpperCase() == paddedKey.toString().toUpperCase()
+                    ) {
+                        session.identity = identityData;
+                        session.save();
+                    }
+                });
+            }
         }
     });
 
