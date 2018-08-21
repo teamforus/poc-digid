@@ -15,6 +15,23 @@ app.use('/digid', digid);
 
 app.use('/identity', identity);
 
+app.get('/', function (req, res) {
+
+    const viewData = {
+        identityAddress: 'asdf',
+        bsn: 'asdf'
+    };
+
+    if (req.session) {
+        if (req.session.identity) {
+            viewData.identityAddress = req.session.identity.address;
+        }
+        viewData.bsn = req.session.bsn
+    }
+
+    res.render('home', viewData)
+});
+
 const server = app.listen(appSettings.server.port, () => console.log('Listening on port ' + appSettings.server.port));
 
 process.on('SIGTERM', () =>  {

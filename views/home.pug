@@ -4,6 +4,9 @@ block content
     p
         a(href='/digid/login') DigiD login
     p
-        BSN: span=bsn
+        a(href='/identity/login') Identity login
     p
-        img(src=qrcode)
+        span bsn: #{bsn}
+    p
+        span identity: #{identityAddress}
+    
