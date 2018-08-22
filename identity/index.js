@@ -71,13 +71,13 @@ getAppKey().then((appKey) => {
                         keyData.key.toString().toUpperCase() == paddedKey.toString().toUpperCase()
                     ) {
                         session.identity = identityData;
-                        session.save();
-                        
-                        const message = JSON.stringify({
-                            eventName: 'loggedIn',
-                            eventData: {}
+                        session.save(() => {
+                            const message = JSON.stringify({
+                                eventName: 'loggedIn',
+                                eventData: {}
+                            });
+                            ws.send(message);
                         });
-                        ws.send(message);
                     }
                 });
             }
