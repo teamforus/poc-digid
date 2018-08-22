@@ -6,6 +6,7 @@ const app = express();
 const digid = require('./digid');
 const identity = require('./identity');
 const appSettings = require('./settings');
+const claim = require('./claim');
 
 app.set('view engine', 'pug')
 
@@ -15,11 +16,13 @@ app.use('/digid', digid);
 
 app.use('/identity', identity);
 
+app.use('/claim', claim);
+
 app.get('/', function (req, res) {
 
     const viewData = {
-        identityAddress: 'asdf',
-        bsn: 'asdf'
+        identityAddress: null,
+        bsn: null
     };
 
     if (req.session) {

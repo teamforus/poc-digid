@@ -23,5 +23,11 @@ module.exports = {
         appKeyDb: 'var/keys.db',
         appKeyIdKey: 'appKeyId',
         libAddrMap: []
+    },
+    oracle: {
+        address: '',
+        key: '',
+        topic: 0,
+        scheme: 0
     }
 }
