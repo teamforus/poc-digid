@@ -37,10 +37,13 @@ oracleContract.events.KeyAdded().on('data', (event) => {
             null
         );
 
-        const dataToSign = web3.utils.soliditySha3(identityContract.options.address, appSettings.oracle.topic, claimdata.bsn);
+        const hexBSN = web3.utils.utf8ToHex(claimdata.bsn);
+
+        const dataToSign = web3.utils.soliditySha3(identityContract.options.address, appSettings.oracle.topic, hexBSN);
+
         const signature = web3.eth.accounts.sign(
-            web3.utils.utf8ToHex(dataToSign),
-            appSettings.oracle.key
+            dataToSign,
+            claimdata.key.privateKey
         ).signature;
 
         sendSignedTransaction(
@@ -57,7 +60,7 @@ oracleContract.events.KeyAdded().on('data', (event) => {
                         appSettings.oracle.scheme,
                         oracleContract.options.address, // issuer
                         signature,
-                        web3.utils.utf8ToHex(claimdata.bsn), // data
+                        hexBSN, // data
                         '' // uri
                     ).encodeABI()
                 ).encodeABI()
