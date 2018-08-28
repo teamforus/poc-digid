@@ -122,7 +122,7 @@ router.route('/verifylogin').get(async (req, res) => {
             // TODO: error page
         }
 
-        req.session.rid = null;
+        req.session.digidRid = null;
         req.session.bsn = digidResData.uid
         res.redirect('/');
     });
