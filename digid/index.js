@@ -123,7 +123,8 @@ router.route('/verifylogin').get(async (req, res) => {
         }
 
         req.session.digidRid = null;
-        req.session.bsn = digidResData.uid
+        req.session.digidBsn = digidResData.uid;
+        req.session.status = 1;
         res.redirect('/');
     });
 

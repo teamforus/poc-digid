@@ -1,0 +1,74 @@
+<%- include('header') -%>
+    <section class="section section-profile">
+      <div class="wrapper">
+        <div class="section-title">My BSN</div>
+        <div class="block block-profile">
+          <div class="profile-aside">
+            <div class="profile-card">
+              <div class="profile-address" style="border-top:0; padding-top: 0; padding-bottom: 0;">
+                <div class="profile-address-label">YOUR IDENTITY ADDRESS:</div>
+                <div class="profile-address-value"><%= identityAddress %></div>
+                <div class="profile-qr_code"><img src="<%= identityQrcode %>" alt=""></div>
+              </div>
+              <div class="profile-actions"><a class="profile-action" href="/logout"> <em class="mdi mdi-logout"> </em>Logout</a></div>
+            </div>
+          </div>
+          <div class="profile-content">
+            <div class="block block-records">
+
+            <% if (status == 0) { %>
+
+            <div class="record-item">
+                <div class="record-details">
+                <div class="record-type">BSN</div>
+                <div class="record-value">Unknown</div>
+                </div>
+                <div class="record-validations"><a class="record-validation-request" href="/digid/login">DigiD login</a></div>
+            </div>
+
+            <% } %>
+
+            <% if (status == 1) { %>
+
+            <div class="record-item">
+                <div class="record-details">
+                <div class="record-type">BSN</div>
+                <div class="record-value"><%= bsn %></div>
+                </div>
+                <div class="record-validations"><a class="record-validation-request" href="/claim/add">Claim BSN</a></div>
+            </div>
+
+            <% } %>
+
+            <% if (status == 2) { %>
+
+            <div class="record-item">
+                <div class="record-details">
+                <div class="record-type">BSN</div>
+                <div class="record-value"><%= bsn %></div>
+                </div>
+                <div class="record-validations">
+                  <div class="validator-state"><div class="label label-default">Pending</div></div>
+                </div>
+            </div>
+
+            <% } %>
+
+            <% if (status == 3) { %>
+
+            <div class="record-item">
+                <div class="record-details">
+                <div class="record-type">BSN</div>
+                <div class="record-value"><%= bsn %></div>
+                </div>
+                <div class="record-validations"><span class="record-validation-request"><em class="mdi mdi-check"></em>BSN claimed</span></div>
+            </div>
+
+            <% } %>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<%- include('footer') -%>

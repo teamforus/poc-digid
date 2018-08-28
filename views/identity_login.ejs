@@ -1,0 +1,46 @@
+<%- include('header') -%>
+
+    <div class="popups">
+            <div class="popup popup-auth">
+                <div class="popup-backdrop"></div>
+                <div class="popup-content">
+                    <div class="popup-title">Aanmelden</div>
+                    <div class="popup-subtitle">Scan deze QR-Code met een ander apparaat waar u al op aangemeld bent</div>
+                    <div class="block block-auth-qr-code">
+                        <div class="qr_code"><img src="<%= qrcode %>"></div>
+                    </div>
+                    <div class="popup-footer">
+                        
+                    </div>
+                </div>
+            </div>
+            </div>
+
+<script>
+        loginId=<%= loginId %>;
+
+        const ws = new WebSocket("ws://localhost:8484/");
+
+        ws.onopen = function()
+        {
+            const message = JSON.stringify({
+                eventName: 'subscribeToLogin',
+                eventData: {
+                    loginId: loginId
+                }
+            })
+
+            ws.send(message);
+        };
+
+        ws.onmessage = function (message) 
+        { 
+            const event = JSON.parse(message.data);
+            switch (event.eventName) {
+                case 'loggedIn':
+                    location.reload();
+                break;
+            }
+        };
+</script>
+<%- include('footer') -%>

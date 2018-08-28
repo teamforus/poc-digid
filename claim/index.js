@@ -6,6 +6,7 @@ var router = express.Router();
 module.exports = router;
 const Web3 = require('web3');
 const IdentityContractData = require('../contracts/identity');
+const ClaimsDb = require('./db');
 
 const web3 = new Web3(appSettings.web3.node);
 
@@ -75,7 +76,7 @@ router.route('/add').get(async (req, res) => {
 
     if (!req.session
         ||
-        !req.session.bsn
+        !req.session.digidBsn
         ||
         !req.session.identity
         ||
@@ -88,7 +89,7 @@ router.route('/add').get(async (req, res) => {
 
         claimRequests[paddedClaimKeyAddress.toUpperCase()] = {
             key: claimKey,
-            bsn: req.session.bsn,
+            bsn: req.session.digidBsn,
             identityAddress: req.session.identity.address
         }
         
@@ -107,8 +108,12 @@ router.route('/add').get(async (req, res) => {
             },
             managmentAccount.privateKey
         );
+        
+        const claimsDb = await ClaimsDb.get();
+        claimsDb.set(req.session.identity.address, req.session.digidBsn);
 
-        res.send('Claim process started');
+        req.session.status = 2;
+        res.redirect('/');
     }
 
 });
