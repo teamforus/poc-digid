@@ -134,10 +134,21 @@ async function getAppKey() {
                 appKeyId = await web3.shh.newKeyPair();
                 keyDb.set(appSettings.web3.appKeyIdKey, appKeyId);
             }
+            let privKey = null;
+            let pubKey = null;
+            try {
+                privKey = await web3.shh.getPrivateKey(appKeyId);
+                pubKey = await web3.shh.getPublicKey(appKeyId);
+            } catch(e) {
+                appKeyId = await web3.shh.newKeyPair();
+                keyDb.set(appSettings.web3.appKeyIdKey, appKeyId);
+                privKey = await web3.shh.getPrivateKey(appKeyId);
+                pubKey = await web3.shh.getPublicKey(appKeyId);
+            }
             resolve({
                 id: appKeyId,
-                priv: await web3.shh.getPrivateKey(appKeyId),
-                pub: await web3.shh.getPublicKey(appKeyId)
+                priv: privKey,
+                pub: pubKey
             });
         }); // keyDb load
     }); // promise
