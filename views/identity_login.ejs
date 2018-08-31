@@ -19,7 +19,7 @@
 <script>
         loginId=<%= loginId %>;
 
-        const ws = new WebSocket("ws://localhost:8484/");
+        const ws = new WebSocket('<%= wsUrl %>');
 
         ws.onopen = function()
         {

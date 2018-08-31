@@ -109,7 +109,7 @@ getAppKey().then((appKey) => {
                     // TODO: logging
                     // TODO: show error page
                 } else {
-                    res.render('identity_login', { loginId: loginId, qrcode: url })
+                    res.render('identity_login', { loginId: loginId, qrcode: url, wsUrl: appSettings.server.wsUrl })
                 }
             })
         }
