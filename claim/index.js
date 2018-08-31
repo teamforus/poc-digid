@@ -47,25 +47,29 @@ oracleContract.events.KeyAdded().on('data', (event) => {
             claimdata.key.privateKey
         ).signature;
 
-        sendSignedTransaction(
-            {
-                from: managmentAccount.address,
-                to: oracleContract.options.address,
-                chainId: appSettings.web3.chainId,
-                gas: appSettings.web3.gas,
-                data: oracleContract.methods.execute(
-                    identityContract.options.address,
-                    0,
-                    identityContract.methods.addClaim(
-                        appSettings.oracle.topic,
-                        appSettings.oracle.scheme,
-                        oracleContract.options.address, // issuer
-                        signature,
-                        hexBSN, // data
-                        '' // uri
-                    ).encodeABI()
+        const trx = {
+            from: managmentAccount.address,
+            to: oracleContract.options.address,
+            gas: appSettings.web3.gas,
+            data: oracleContract.methods.execute(
+                identityContract.options.address,
+                0,
+                identityContract.methods.addClaim(
+                    appSettings.oracle.topic,
+                    appSettings.oracle.scheme,
+                    oracleContract.options.address, // issuer
+                    signature,
+                    hexBSN, // data
+                    '' // uri
                 ).encodeABI()
-            },
+            ).encodeABI()
+        }
+        if (appSettings.web3.chainId) {
+            trx.chainId = appSettings.web3.chainId;
+        }
+
+        sendSignedTransaction(
+            trx,
             managmentAccount.privateKey
         );
         
@@ -94,18 +98,22 @@ router.route('/add').get(async (req, res) => {
         }
         
         // Add claim key to oracle
+        const trx = {
+            from: managmentAccount.address,
+            to: oracleContract.options.address,
+            gas: appSettings.web3.gas,
+            data: oracleContract.methods.addKey(
+                paddedClaimKeyAddress,
+                3,
+                1
+            ).encodeABI()
+        };
+        if (appSettings.web3.chainId) {
+            trx.chainId = appSettings.web3.chainId;
+        }
+
         sendSignedTransaction(
-            {
-                from: managmentAccount.address,
-                to: oracleContract.options.address,
-                chainId: appSettings.web3.chainId,
-                gas: appSettings.web3.gas,
-                data: oracleContract.methods.addKey(
-                    paddedClaimKeyAddress,
-                    3,
-                    1
-                ).encodeABI()
-            },
+            trx,
             managmentAccount.privateKey
         );
         
