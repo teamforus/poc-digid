@@ -117,7 +117,8 @@ router.route('/verifylogin').get(async (req, res) => {
             }
         } catch (err) {
             res.status(500);
-            res.send("An error occured");
+            res.send("An error occured: " + err);
+            return;
             // TODO: logging
             // TODO: error page
         }
