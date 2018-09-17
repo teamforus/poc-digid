@@ -41,46 +41,54 @@ getAppKey().then((appKey) => {
             privateKeyID: appKey.id,
         }
     ).on('data', data => {
-        const loginData = JSON.parse(web3.utils.hexToUtf8(data.payload));
-        if ('login' === loginData.request) {
-            const session = loginIdSessions['id_' + loginData.id].session;
-            const ws = loginIdSessions['id_' + loginData.id].ws;
-            const identityData = {
-                address: loginData.body.address,
-                key: loginData.body.key,
-                name: loginData.body.name
-            };
-            const signature = loginData.body.signature;
-            const signData = web3.utils.soliditySha3(identityData.address, identityData.key, identityData.name);
-            const recoveredKey = web3.eth.accounts.recover(signData, signature);
-            if (recoveredKey == identityData.key) {
+        try {
+            const loginData = JSON.parse(web3.utils.hexToUtf8(data.payload));
+            if ('login' === loginData.request) {
+                if (!loginIdSessions['id_' + loginData.id]) {
+                    return;
+                }
+                const session = loginIdSessions['id_' + loginData.id].session;
+                const ws = loginIdSessions['id_' + loginData.id].ws;
+                const identityData = {
+                    address: loginData.body.address,
+                    key: loginData.body.key,
+                    name: loginData.body.name
+                };
+                const signature = loginData.body.signature;
+                const signData = web3.utils.soliditySha3(identityData.address, identityData.key, identityData.name);
+                const recoveredKey = web3.eth.accounts.recover(signData, signature);
+                if (recoveredKey == identityData.key) {
 
-                const identityContract = new web3.eth.Contract(
-                    IdentityContractData.abi,
-                    identityData.address,
-                    null
-                );
-                
-                const paddedKey = web3.utils.padLeft(identityData.key, 64)
+                    const identityContract = new web3.eth.Contract(
+                        IdentityContractData.abi,
+                        identityData.address,
+                        null
+                    );
+                    
+                    const paddedKey = web3.utils.padLeft(identityData.key, 64)
 
-                identityContract.methods.getKey(paddedKey).call().then((keyData) => {
-                    if (keyData.keyType == 1
-                        &&
-                        (keyData.purposes.includes('1') || keyData.purposes.includes('2'))
-                        &&
-                        keyData.key.toString().toUpperCase() == paddedKey.toString().toUpperCase()
-                    ) {
-                        session.identity = identityData;
-                        session.save(() => {
-                            const message = JSON.stringify({
-                                eventName: 'loggedIn',
-                                eventData: {}
+                    identityContract.methods.getKey(paddedKey).call().then((keyData) => {
+                        if (keyData.keyType == 1
+                            &&
+                            (keyData.purposes.includes('1') || keyData.purposes.includes('2'))
+                            &&
+                            keyData.key.toString().toUpperCase() == paddedKey.toString().toUpperCase()
+                        ) {
+                            session.identity = identityData;
+                            session.save(() => {
+                                const message = JSON.stringify({
+                                    eventName: 'loggedIn',
+                                    eventData: {}
+                                });
+                                ws.send(message);
                             });
-                            ws.send(message);
-                        });
-                    }
-                });
+                        }
+                    });
+                }
             }
+        } catch (e) {
+            console.log(e);
+            // TODO: add logging
         }
     });
 
